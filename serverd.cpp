@@ -20,6 +20,27 @@ void serverd::incomingConnection(int socketfd)
     connect(client, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(client, SIGNAL(disconnected()), this, SLOT(disconnected()));
 }
+
+
+bool serverd::isNameValid(QString name) const
+{
+    if (name.length() <= 20 && name.length() > 3)
+        return false;
+    QRegExp r("[A-Za-z0-9_]+");
+    return r.exactMatch(name);
+}
+
+bool serverd::isNameUsed(QString name) const
+{
+    return (!users.key(name,NULL));
+}
+
+void serverd::SendUserList()
+{
+
+
+}
+
 void serverd::readyRead()
 {
     QTcpSocket *client = (QTcpSocket*)sender();
@@ -41,39 +62,36 @@ void serverd::readyRead()
 
     switch(command)
     {
-        //
         case comAuthorization:
         {
             QString name;
             in >> name;
             qDebug()  << "Received command comAuthorization" << command<< " , name=name";;
-            //
-            /*
-            if (!isNameValid(name))
+
+            if (isNameValid(name))
             {
-                //
-                doSendCommand(comErrNameInvalid);
+                if (isNameUsed(name))
+                {
+                    doSendCommand(comErrNameUsed,client);
+
+                }
+                else //everything is ok
+                {
+                    doSendCommand(comAuthorizationSuccess,client);
+                    foreach(QTcpSocket *otherClient, clients)
+                        //otherClient->write(QString(user + ":" + message + "\n").toUtf8());
+                        doSendCommand(comAuthorizationSuccess,client);
+                    users[client]=name;
+
+                }
+
+            } else {
+                doSendCommand(comErrNameInvalid,client);
                 return;
             }
-            //
-            if (isNameUsed(name))
-            {
-                //
-                doSendCommand(comErrNameUsed);
-                return;
-            }
-            //*/
-            //_name = name;
-            //_isAutched = true;
-            //
-            //doSendUsersOnline();
-            //
-            //emit addUserToGui(name);
-            //
-            //client->doSendToAllUserJoin(_name);
         }
         break;
-        //
+        /*
         case comMessageToAll:
         {
         }
@@ -83,15 +101,9 @@ void serverd::readyRead()
         {
         }
         break;
+        */
     }
 
-
-    /*
-    while(client->canReadLine())
-    {
-
-    }
-    */
 }
 
 void serverd::doSendCommand(quint8 comm, QTcpSocket *client) const
