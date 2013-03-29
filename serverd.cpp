@@ -13,7 +13,6 @@ void serverd::incomingConnection(int socketfd)
     client->setSocketDescriptor(socketfd);
     clientlist.insert(client);
     blocksize[client]=0;
-    //clientlist.insert(client);
 
     qDebug() << "New client from:" << client->peerAddress().toString();
 
@@ -24,15 +23,18 @@ void serverd::incomingConnection(int socketfd)
 
 bool serverd::isNameValid(QString name) const
 {
-    if (name.length() <= 20 && name.length() > 3)
+    qDebug() << "IsValid: name=" << name;
+
+    if (name.length() > 20 || name.length() <= 3)
         return false;
     QRegExp r("[A-Za-z0-9_]+");
+    qDebug() << "IsVanidName=" << name<< ", "<< r.exactMatch(name);
     return r.exactMatch(name);
 }
 
 bool serverd::isNameUsed(QString name) const
 {
-    return (!users.key(name,NULL));
+    return (users.key(name,NULL));
 }
 
 void serverd::SendUserList()
@@ -66,10 +68,11 @@ void serverd::readyRead()
         {
             QString name;
             in >> name;
-            qDebug()  << "Received command comAuthorization" << command<< " , name=name";;
+            qDebug()  << "Received command comAuthorization" << command<< " , name=" <<name;
 
             if (isNameValid(name))
             {
+                qDebug()<< "nameValid";
                 if (isNameUsed(name))
                 {
                     doSendCommand(comErrNameUsed,client);
@@ -78,14 +81,17 @@ void serverd::readyRead()
                 else //everything is ok
                 {
                     doSendCommand(comAuthorizationSuccess,client);
-                    foreach(QTcpSocket *otherClient, clients)
+                    /*
+                    foreach(QTcpSocket *otherClient, clientlist)
                         //otherClient->write(QString(user + ":" + message + "\n").toUtf8());
-                        doSendCommand(comAuthorizationSuccess,client);
+                        doSendCommand(comAuthorizationSuccess,otherClient);
+                    */
                     users[client]=name;
 
                 }
 
             } else {
+                qDebug()<< "bad";
                 doSendCommand(comErrNameInvalid,client);
                 return;
             }
@@ -127,38 +133,9 @@ void serverd::disconnected()
 
     QString user = users[client];
     users.remove(client);
+    blocksize.remove(client);
 
     //SendUserList();
     foreach(QTcpSocket *client, clientlist)
         client->write(QString("Server:" + user + " has left.\n").toUtf8());
 }
-/*
-void serverd::SendUserList()
-{
-    QStringList userList;
-    foreach(QString user, users.values())
-        userList << user;
-
-    foreach(QTcpSocket *client, clientlist)
-        client->write(QString("/users:" + userList.join(",") + "\n").toUtf8());
-}
-
-void serverd::AddUserToList(QString username)
-{
-    QString message = "User "+username+" entered to our chatik";
-    //QString user = users[client];
-    //qDebug() << "User:" << user;
-    //qDebug() << "Message:" << message;
-
-    //foreach(QTcpSocket *otherClient, clientlist)
-        //otherClient->write(QString(user + ":" + message + "\n").toUtf8());
-
-
-}
-
-void serverd::RemoveUserFromList(QString username)
-{
-    //foreach(QTcpSocket *client, clientlist)
-        //client->write(QString("/users:" + userList.join(",") + "\n").toUtf8());
-}
-*/
