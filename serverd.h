@@ -20,13 +20,15 @@ public:
     //send message User join/left
     static const quint8 comUserJoin = 3;
     static const quint8 comUserLeft = 4;
+    static const quint8 comUsersOnline = 5;
+
+    static const quint8 comMessageToAll = 6;
+    static const quint8 comMessageToUsers = 7;
+
+
+
 
     /*
-    static const quint8 comUsersOnline = 2;
-    static const quint8 comUserJoin = 3;
-    static const quint8 comUserLeft = 4;
-    static const quint8 comMessageToAll = 5;
-    static const quint8 comMessageToUsers = 6;
     static const quint8 comPublicServerMessage = 7;
     static const quint8 comPrivateServerMessage = 8;
     */
@@ -44,7 +46,9 @@ private slots:
 
 protected:
     void incomingConnection(int socketfd);//1
-    void doSendCommand(quint8 comm, QTcpSocket *client) const;
+    void doSendCommand(quint8 comm, QTcpSocket *client,QString message) const;
+    void doSendMessageToAll(QString message) const;
+    QByteArray CreateDatagramm(quint8 comm,QString message) const;
 //    bool CheckName(QString username);
     void SendUserList();
 //    void AddUserToList(QString username);
