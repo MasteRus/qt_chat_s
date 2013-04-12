@@ -45,12 +45,16 @@ private slots:
     //void Disconnectclient();
 
 protected:
+    QByteArray CreateDatagramm(quint8 comm,QString message) const;
+
     void incomingConnection(int socketfd);//1
     void doSendCommand(quint8 comm, QTcpSocket *client,QString message) const;
+    void doSendCommandToAll(quint8 comm, QString message) const;
     void doSendMessageToAll(QString message) const;
-    QByteArray CreateDatagramm(quint8 comm,QString message) const;
+
 //    bool CheckName(QString username);
-    void SendUserList();
+    void doSendUserList(QString message, QTcpSocket *client) const;
+
 //    void AddUserToList(QString username);
 //    void RemoveUserFromList(QString username);
 //    //

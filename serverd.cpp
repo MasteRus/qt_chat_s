@@ -36,12 +36,6 @@ bool serverd::isNameUsed(QString name) const
     return (users.key(name,NULL));
 }
 
-void serverd::SendUserList()
-{
-
-
-}
-
 void serverd::readyRead()
 {
     QTcpSocket *client = (QTcpSocket*)sender();
@@ -80,11 +74,17 @@ void serverd::readyRead()
                 else //everything is ok
                 {
                     doSendCommand(comAuthorizationSuccess,client,"");
-                    users[client]=name;
+                    users[client]=name;//adding to list
 
+                    doSendCommandToAll(comUserJoin,name);
+
+                    doSendUserList(comUsersOnline,client);
+
+                    /*
                     //doSendCommand(comUserJoin,client);
                     foreach(QTcpSocket *otherClient, clientlist)
                         doSendCommand(comUserJoin,otherClient,name);
+                        */
                 }
 
             } else {
@@ -134,6 +134,25 @@ void serverd::doSendCommand(quint8 comm, QTcpSocket *client, QString message) co
     QByteArray block=CreateDatagramm(comm,message);
     client->write(block);
 }
+
+void serverd::doSendCommandToAll(quint8 comm, QString message) const
+{
+    QByteArray block=CreateDatagramm(comm,message);
+    foreach(QTcpSocket *otherClient, clientlist)
+        otherClient->write(block);
+
+}
+
+void serverd::doSendUserList(QString message, QTcpSocket *client) const
+{
+
+    QString temp();
+    foreach(QTcpSocket *client, clientlist)
+        client->->write(block);
+    QByteArray block=CreateDatagramm(comm,message);
+}
+
+
 
 void serverd::doSendMessageToAll(QString message) const
 {
