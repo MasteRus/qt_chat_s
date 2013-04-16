@@ -78,7 +78,7 @@ void serverd::readyRead()
 
                     doSendCommandToAll(comUserJoin,name);
 
-                    doSendUserList(comUsersOnline,client);
+                    doSendUserList(client);
 
                     /*
                     //doSendCommand(comUserJoin,client);
@@ -143,13 +143,19 @@ void serverd::doSendCommandToAll(quint8 comm, QString message) const
 
 }
 
-void serverd::doSendUserList(QString message, QTcpSocket *client) const
+void serverd::doSendUserList(QTcpSocket *client) const
 {
 
-    QString temp();
-    foreach(QTcpSocket *client, clientlist)
-        client->->write(block);
-    QByteArray block=CreateDatagramm(comm,message);
+    QString temp;
+    foreach(QTcpSocket *otherclient, clientlist)
+        //client->->write(block);
+    {
+        temp.append(users.value(otherclient)+"|");
+        //qDebug() << "value=" <<users.value(otherclient);
+    }
+    //qDebug() << users.value(otherclient);
+    qDebug() << "clientlist" << temp ;
+    //QByteArray block=CreateDatagramm(comm,message);
 }
 
 

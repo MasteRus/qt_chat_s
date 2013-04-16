@@ -53,7 +53,8 @@ protected:
     void doSendMessageToAll(QString message) const;
 
 //    bool CheckName(QString username);
-    void doSendUserList(QString message, QTcpSocket *client) const;
+    void doSendUserList(QTcpSocket *client) const;
+
 
 //    void AddUserToList(QString username);
 //    void RemoveUserFromList(QString username);
