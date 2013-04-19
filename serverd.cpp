@@ -4,6 +4,7 @@
 #include <QRegExp>
 #include <QStringList>
 
+
 serverd::serverd(QObject *parent) : QTcpServer(parent)
 {
 }
@@ -153,9 +154,11 @@ void serverd::doSendUserList(QTcpSocket *client) const
         temp.append(users.value(otherclient)+"|");
         //qDebug() << "value=" <<users.value(otherclient);
     }
-    //qDebug() << users.value(otherclient);
     qDebug() << "clientlist" << temp ;
-    //QByteArray block=CreateDatagramm(comm,message);
+    QByteArray block=CreateDatagramm(comUsersOnline,temp);
+
+    foreach(QTcpSocket *otherClient, clientlist)
+        otherClient->write(block);
 }
 
 
