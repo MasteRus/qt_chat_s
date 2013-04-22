@@ -46,12 +46,13 @@ void serverd::readyRead()
         if (client->bytesAvailable() < (int)sizeof(quint16))
             return;
         in >> blocksize[client];
-        qDebug() << "_blockSize now " << (quint16)(blocksize[client]) <<", abaliable="<<client->bytesAvailable();
+        qDebug() << "_blockSize now " << (quint16)(blocksize[client]) <<", avaliable="<<client->bytesAvailable();
     }
     if (client->bytesAvailable() < blocksize[client])
         return;
     else
         blocksize[client] = 0;
+
     quint8 command;
     in >> command;
     qDebug() << "Received command " << command;
@@ -69,28 +70,22 @@ void serverd::readyRead()
                 qDebug()<< "nameValid";
                 if (isNameUsed(name))
                 {
-                    doSendCommand(comErrNameUsed,client,"");
+                    doSendCommand(comErrNameUsed,client);
 
                 }
                 else //everything is ok
                 {
-                    doSendCommand(comAuthorizationSuccess,client,"");
+                    doSendCommand(comAuthorizationSuccess,client);
                     users[client]=name;//adding to list
 
                     doSendCommandToAll(comUserJoin,name);
 
                     doSendUserList(client);
-
-                    /*
-                    //doSendCommand(comUserJoin,client);
-                    foreach(QTcpSocket *otherClient, clientlist)
-                        doSendCommand(comUserJoin,otherClient,name);
-                        */
                 }
 
             } else {
                 qDebug()<< "bad";
-                doSendCommand(comErrNameInvalid,client,"");
+                doSendCommand(comErrNameInvalid,client);
                 return;
             }
         }
@@ -115,7 +110,7 @@ void serverd::readyRead()
         break;
 
     }
-
+    qDebug() << "END_blockSize now " << (quint16)(blocksize[client]) <<", avaliable="<<client->bytesAvailable();
 }
 
 QByteArray serverd::CreateDatagramm(quint8 comm,QString message) const
@@ -130,9 +125,26 @@ QByteArray serverd::CreateDatagramm(quint8 comm,QString message) const
     return block;
 }
 
+QByteArray serverd::CreateDatagramm(quint8 comm) const
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out << (quint16)0;
+    out << comm;
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+    return block;
+}
+
 void serverd::doSendCommand(quint8 comm, QTcpSocket *client, QString message) const
 {
     QByteArray block=CreateDatagramm(comm,message);
+    client->write(block);
+}
+
+void serverd::doSendCommand(quint8 comm, QTcpSocket *client) const
+{
+    QByteArray block=CreateDatagramm(comm);
     client->write(block);
 }
 
