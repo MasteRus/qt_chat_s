@@ -71,18 +71,15 @@ void serverd::readyRead()
                 if (isNameUsed(name))
                 {
                     doSendCommand(comErrNameUsed,client);
-
                 }
                 else //everything is ok
                 {
-                    doSendCommand(comAuthorizationSuccess,client);
                     users[client]=name;//adding to list
 
+                    doSendCommand(comAuthorizationSuccess,client);
                     doSendCommandToAll(comUserJoin,name);
-
                     doSendUserList(client);
                 }
-
             } else {
                 qDebug()<< "bad";
                 doSendCommand(comErrNameInvalid,client);
@@ -96,7 +93,7 @@ void serverd::readyRead()
             QString message;
             QString username=users[client];
             in >> message;
-            doSendMessageToAll(message);
+            doSendMessageToAll(username+":"+message);
         }
         break;
 
@@ -105,12 +102,17 @@ void serverd::readyRead()
             QString message;
             QString username=users[client];
             in >> message;
-            //doSendMessage(username+":"+message);
+            QString temp=message.section(":",1);
+            QString usersstring=message.section(":",0,0);
+            qDebug() << "Users:" <<usersstring <<" message=" << message  ;
+            QStringList userslist=usersstring.split(",");
+            //use
+            doSendMessageToUsers("[private] "+username+":"+temp,userslist);
         }
         break;
 
     }
-    qDebug() << "END_blockSize now " << (quint16)(blocksize[client]) <<", avaliable="<<client->bytesAvailable();
+    qDebug() << "END_blockSize now " << (quint16)(blocksize[client]) <<", avaliable="<<client->bytesAvailable()<< '\n';
 }
 
 QByteArray serverd::CreateDatagramm(quint8 comm,QString message) const
@@ -124,7 +126,6 @@ QByteArray serverd::CreateDatagramm(quint8 comm,QString message) const
     out << (quint16)(block.size() - sizeof(quint16));
     return block;
 }
-
 QByteArray serverd::CreateDatagramm(quint8 comm) const
 {
     QByteArray block;
@@ -141,7 +142,6 @@ void serverd::doSendCommand(quint8 comm, QTcpSocket *client, QString message) co
     QByteArray block=CreateDatagramm(comm,message);
     client->write(block);
 }
-
 void serverd::doSendCommand(quint8 comm, QTcpSocket *client) const
 {
     QByteArray block=CreateDatagramm(comm);
@@ -158,22 +158,19 @@ void serverd::doSendCommandToAll(quint8 comm, QString message) const
 
 void serverd::doSendUserList(QTcpSocket *client) const
 {
-
     QString temp;
     foreach(QTcpSocket *otherclient, clientlist)
-        //client->->write(block);
     {
         temp.append(users.value(otherclient)+"|");
         //qDebug() << "value=" <<users.value(otherclient);
     }
+    temp.remove(temp.length()-1, 1);
     qDebug() << "clientlist" << temp ;
     QByteArray block=CreateDatagramm(comUsersOnline,temp);
 
     foreach(QTcpSocket *otherClient, clientlist)
         otherClient->write(block);
 }
-
-
 
 void serverd::doSendMessageToAll(QString message) const
 {
@@ -182,6 +179,16 @@ void serverd::doSendMessageToAll(QString message) const
     foreach(QTcpSocket *client, clientlist)
         client->write(block);
 }
+
+void serverd::doSendMessageToUsers(QString message, QStringList userlist) const
+{
+    QByteArray block=CreateDatagramm(comMessageToUsers,message);
+
+    foreach(QTcpSocket *client, clientlist)
+        if (userlist.contains(users[client]))
+            client->write(block);
+}
+
 
 void serverd::disconnected()
 {

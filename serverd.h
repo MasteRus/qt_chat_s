@@ -15,18 +15,14 @@ public:
     serverd(QObject *parent=0);
     //request Authorization
     static const quint8 comAuthorization = 1;
-    //send message Authorization Success
     static const quint8 comAuthorizationSuccess = 2;
     //send message User join/left
     static const quint8 comUserJoin = 3;
     static const quint8 comUserLeft = 4;
     static const quint8 comUsersOnline = 5;
-
+    //send message Message
     static const quint8 comMessageToAll = 6;
     static const quint8 comMessageToUsers = 7;
-
-
-
 
     /*
     static const quint8 comPublicServerMessage = 7;
@@ -52,9 +48,9 @@ protected:
     void doSendCommand(quint8 comm, QTcpSocket *client,QString message) const;
     void doSendCommand(quint8 comm, QTcpSocket *client) const;
 
-
     void doSendCommandToAll(quint8 comm, QString message) const;
     void doSendMessageToAll(QString message) const;
+    void doSendMessageToUsers(QString message, QStringList userlist) const;
 
 //    bool CheckName(QString username);
     void doSendUserList(QTcpSocket *client) const;
