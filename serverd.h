@@ -24,10 +24,6 @@ public:
     static const quint8 comMessageToAll = 6;
     static const quint8 comMessageToUsers = 7;
 
-    /*
-    static const quint8 comPublicServerMessage = 7;
-    static const quint8 comPrivateServerMessage = 8;
-    */
     static const quint8 comErrNameInvalid = 201;
     static const quint8 comErrNameUsed = 202;
 
@@ -52,17 +48,7 @@ protected:
     void doSendMessageToAll(QString message) const;
     void doSendMessageToUsers(QString message, QStringList userlist) const;
 
-//    bool CheckName(QString username);
     void doSendUserList(QTcpSocket *client) const;
-
-
-//    void AddUserToList(QString username);
-//    void RemoveUserFromList(QString username);
-//    //
-//    void SendMessageToAll();
-//    void SendMessageToUser();
-
-
 private:
     QSet<QTcpSocket*> clientlist;
     QMap<QTcpSocket*,quint16> blocksize;

@@ -76,8 +76,9 @@ void serverd::readyRead()
                 {
                     users[client]=name;//adding to list
 
-                    doSendCommand(comAuthorizationSuccess,client);
                     doSendCommandToAll(comUserJoin,name);
+                    doSendCommand(comAuthorizationSuccess,client);
+
                     doSendUserList(client);
                 }
             } else {
@@ -162,10 +163,10 @@ void serverd::doSendUserList(QTcpSocket *client) const
     foreach(QTcpSocket *otherclient, clientlist)
     {
         temp.append(users.value(otherclient)+"|");
-        //qDebug() << "value=" <<users.value(otherclient);
     }
     temp.remove(temp.length()-1, 1);
     qDebug() << "clientlist" << temp ;
+
     QByteArray block=CreateDatagramm(comUsersOnline,temp);
 
     foreach(QTcpSocket *otherClient, clientlist)
@@ -201,7 +202,5 @@ void serverd::disconnected()
     users.remove(client);
     blocksize.remove(client);
 
-    //SendUserList();
-    foreach(QTcpSocket *client, clientlist)
-        client->write(QString("Server:" + user + " has left.\n").toUtf8());
+    doSendCommandToAll(comUserLeft,user);
 }
