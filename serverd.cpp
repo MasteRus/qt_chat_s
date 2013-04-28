@@ -1,5 +1,5 @@
 #include "serverd.h"
-
+#include "abstractchat.h"
 #include <QTcpSocket>
 #include <QRegExp>
 #include <QStringList>
@@ -105,6 +105,7 @@ void serverd::readyRead()
             in >> message;
             QString temp=message.section(":",1);
             QString usersstring=message.section(":",0,0);
+            usersstring.append(","+username);
             qDebug() << "Users:" <<usersstring <<" message=" << message  ;
             QStringList userslist=usersstring.split(",");
             //use
@@ -115,7 +116,7 @@ void serverd::readyRead()
     }
     qDebug() << "END_blockSize now " << (quint16)(blocksize[client]) <<", avaliable="<<client->bytesAvailable()<< '\n';
 }
-
+/*
 QByteArray serverd::CreateDatagramm(quint8 comm,QString message) const
 {
     QByteArray block;
@@ -148,7 +149,7 @@ void serverd::doSendCommand(quint8 comm, QTcpSocket *client) const
     QByteArray block=CreateDatagramm(comm);
     client->write(block);
 }
-
+*/
 void serverd::doSendCommandToAll(quint8 comm, QString message) const
 {
     QByteArray block=CreateDatagramm(comm,message);

@@ -21,7 +21,9 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    serverd.cpp
+    serverd.cpp \
+    abstractchat.cpp
 
 HEADERS += \
-    serverd.h
+    serverd.h \
+    abstractchat.h
